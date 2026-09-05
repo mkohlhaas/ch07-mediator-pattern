@@ -6,10 +6,12 @@
 // 1. Define the components //
 // ======================== //
 
+#[derive(Default)]
 struct InputField {
     pub value: String,
 }
 
+#[derive(Default)]
 struct SubmitButton {
     pub enabled: bool,
 }
@@ -18,21 +20,13 @@ struct SubmitButton {
 // 2. Define the Mediator that completely owns the components //
 // ========================================================== //
 
+#[derive(Default)]
 struct FormMediator {
     input_field: InputField,
     submit_button: SubmitButton,
 }
 
 impl FormMediator {
-    fn new() -> Self {
-        Self {
-            input_field: InputField {
-                value: String::new(),
-            },
-            submit_button: SubmitButton { enabled: false },
-        }
-    }
-
     // Components notify the mediator about events by passing values,
     // rather than holding a mutable reference back to the mediator.
     pub fn handle_input_change(&mut self, text: String) {
@@ -50,13 +44,17 @@ impl FormMediator {
     }
 }
 
+// ===== //
+// Usage //
+// ===== //
+
 fn main() {
-    let mut form = FormMediator::new();
+    let mut mediator = FormMediator::default();
 
     // Simulating events coming into the system top-down
-    form.handle_input_change("Hello Rust!".to_string());
-    form.print_status(); // Output: Input: 'Hello Rust!', Button Enabled: true
+    mediator.handle_input_change("Hello Rust!".to_string());
+    mediator.print_status(); // Output: Input: 'Hello Rust!', Button Enabled: true
 
-    form.handle_input_change("".to_string());
-    form.print_status(); // Output: Input: '', Button Enabled: false
+    mediator.handle_input_change("".to_string());
+    mediator.print_status(); // Output: Input: '', Button Enabled: false
 }
