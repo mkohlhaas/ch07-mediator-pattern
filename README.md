@@ -1,7 +1,7 @@
 ### The Mediator Pattern
 
-The Mediator pattern provides a way to reduce direct
-dependencies between components by having them communicate through a central coordinator.
+The Mediator pattern provides a way to reduce direct dependencies between
+components by having them communicate through a central coordinator.
 
 The Mediator design pattern in Rust is considered an anti-pattern when
 implemented using the classic object-oriented approach. Having multiple
@@ -12,11 +12,52 @@ To implement it idiomatically in Rust, you must drop shared mutability pointers
 like Rc<RefCell<T>> and instead adopt a top-down ownership approach or a
 messaging registry.
 
-------------------------------
-## The Two Ways to Build a Mediator in Rust
+### Conceptual Diagram
+
+```
+       ┌────────────────────────────────────────────────────────┐
+       │                       «interface»                      │
+       │                        Mediator                        │
+       ├────────────────────────────────────────────────────────┤
+       │ + notify(sender: &str, event: &str)                    │
+       └───────────────────────────▲────────────────────────────┘
+                                   │
+                                   │  implements 
+                                   │
+       ┌────────────────────────────────────────────────────────┐
+       │                    ConcreteMediator                    │
+       ├────────────────────────────────────────────────────────┤
+       │ - components: HashMap<String, Box<dyn Component>>      │
+       ├────────────────────────────────────────────────────────┤
+       │ + register(name: &str, component: Box<dyn Component>)  │
+       │ + notify(sender: &str, event: &str)                    │
+       └───────────────────────────┬────────────────────────────┘
+                                   │
+                                   │  owns (via Box<dyn>)
+                                   ▼
+       ┌────────────────────────────────────────────────────────┐
+       │                       «interface»                      │
+       │                        Component                       │
+       ├────────────────────────────────────────────────────────┤
+       │ + operation(mediator: &mut dyn Mediator)               │
+       │ + as_any_mut() -> &mut dyn Any                         │
+       └───────────────────────────▲────────────────────────────┘
+                                   │
+                     ┌─────────────┴─────────────┐
+                     │                           │
+  ┌──────────────────┴───────────────┐ ┌─────────┴────────────────────────┐
+  │            ComponentA            │ │            ComponentB            │
+  ├──────────────────────────────────┤ ├──────────────────────────────────┤
+  │ - state: String                  │ │ - active: bool                   │
+  ├──────────────────────────────────┤ ├──────────────────────────────────┤
+  │ + operation(mediator: &mut dyn)  │ │ + operation(mediator: &mut dyn)  │
+  │ + receive_trigger()              │ │ + receive_action()               │
+  └──────────────────────────────────┘ └──────────────────────────────────┘
+```
+
+### The Two Ways to Build a Mediator in Rust
 
 | Approach | How it Works | Rust Safety Mechanism | Pros & Cons |
 |---|---|---|---|
 | Top-Down Ownership (Idiomatic) | The Mediator owns all components. Components do not point to the Mediator; events are processed via central loop methods. | Standard compile-time ownership (mut self) | 🟢 Fast and completely safe 🔴 Changes standard OOP control flow structure |
 | Shared Mutability (Classic OOP) | Components hold shared pointers to the Mediator, and the Mediator holds pointers to components. | Run-time checking (Rc<RefCell<T>>) | 🟢 Familiar OOP setup 🔴 Risk of runtime crashes (panic!) and memory leaks |
-
