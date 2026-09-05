@@ -3,10 +3,10 @@
 The Mediator pattern provides a way to reduce direct dependencies between
 components by having them communicate through a central coordinator.
 
-The Mediator design pattern in Rust is considered an anti-pattern when
+⚠️ **The Mediator design pattern in Rust is considered an anti-pattern when
 implemented using the classic object-oriented approach. Having multiple
 components hold mutable cross-references to each other directly violates Rust's
-strict [aliasing and borrow checker rules](https://github.com/fadeevab/mediator-pattern-rust).
+strict [aliasing and borrow checker rules](https://github.com/fadeevab/mediator-pattern-rust).**
 
 To implement it idiomatically in Rust, you must drop shared mutability pointers
 like Rc<RefCell<T>> and instead adopt a top-down ownership approach or a
